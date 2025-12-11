@@ -102,10 +102,7 @@ function PostTweetForm() {
             });
 
             if (image) {
-                const locationRef = ref(
-                    storage,
-                    `tweets/${user.uid}-${user.displayName}/${doc.id}`,
-                );
+                const locationRef = ref(storage, `tweets/${user.uid}/${doc.id}`);
                 const result = await uploadBytes(locationRef, image);
                 const url = await getDownloadURL(result.ref);
                 await updateDoc(doc, {
