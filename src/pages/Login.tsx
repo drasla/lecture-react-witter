@@ -56,7 +56,7 @@ function Login() {
             {errors.root && <ErrorText>{errors.root.message}</ErrorText>}
 
             <Switcher>
-                Don't have an account? <Link to="/create-account">Create one &rarr;</Link>
+                Don't have an account? <Link to="/createAccount">Create one &rarr;</Link>
             </Switcher>
         </Wrapper>
     );
