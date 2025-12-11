@@ -1,5 +1,14 @@
+import styled from "styled-components";
+import PostTweetForm from "../components/PostTweetForm.tsx";
+
+const Wrapper = styled.div``;
+
 function Home() {
-    return <>Home</>;
+    return (
+        <Wrapper>
+            <PostTweetForm />
+        </Wrapper>
+    );
 }
 
 export default Home;
