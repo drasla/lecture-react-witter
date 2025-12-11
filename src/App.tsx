@@ -4,6 +4,13 @@ import router from "./router/router.tsx";
 import { useEffect, useState } from "react";
 import LoadingScreen from "./components/LoadingScreen.tsx";
 import { auth } from "./firebase.ts";
+import styled from "styled-components";
+
+const Wrapper = styled.div`
+    height: 100dvh;
+    display: flex;
+    justify-content: center;
+`;
 
 function App() {
     const [isLoading, setIsLoading] = useState(true);
@@ -18,10 +25,10 @@ function App() {
     }, []);
 
     return (
-        <>
+        <Wrapper>
             <GlobalStyle />
             {isLoading ? <LoadingScreen /> : <RouterProvider router={router} />}
-        </>
+        </Wrapper>
     );
 }
 
