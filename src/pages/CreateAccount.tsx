@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useNavigate } from "react-router";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "../firebase.ts";
 
 const Wrapper = styled.div`
     height: 100%;
@@ -8,7 +10,7 @@ const Wrapper = styled.div`
     flex-direction: column;
     align-items: center;
     width: 420px;
-    padding: 50px 0px;
+    padding: 50px 0;
 `;
 
 const Title = styled.h1`
@@ -49,6 +51,7 @@ type FormValues = {
 };
 
 function CreateAccount() {
+    const navigate = useNavigate();
 
     const {
         register,
@@ -57,18 +60,25 @@ function CreateAccount() {
         setError,
     } = useForm<FormValues>();
 
-    const onSubmit = (data: FormValues) => {
+    const onSubmit = async (data: FormValues) => {
         try {
-            // 회원 가입 처리를 할 코드 작성
+            const credentials = await createUserWithEmailAndPassword(
+                auth,
+                data.email,
+                data.password,
+            );
+            await updateProfile(credentials.user, {
+                displayName: data.name,
+            });
+            navigate("/");
         } catch (error) {
             console.log(error);
             setError("root", { message: "계정 생성에 실패하였습니다." });
-        } finally {
         }
     };
     return (
         <Wrapper>
-            <Title>Log into 𝕏</Title>
+            <Title>Join 𝕏</Title>
             <Form onSubmit={handleSubmit(onSubmit)}>
                 <Input
                     {...register("name", { required: "이름을 입력해주세요." })}
