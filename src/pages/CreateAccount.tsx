@@ -1,48 +1,8 @@
-import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../firebase.ts";
-
-const Wrapper = styled.div`
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 420px;
-    padding: 50px 0;
-`;
-
-const Title = styled.h1`
-    font-size: 42px;
-`;
-
-const Form = styled.form`
-    margin-top: 50px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-`;
-
-const Input = styled.input`
-    padding: 10px 20px;
-    border-radius: 50px;
-    border: none;
-    width: 100%;
-    font-size: 16px;
-    &[type="submit"] {
-        cursor: pointer;
-        &:hover {
-            opacity: 0.8;
-        }
-    }
-`;
-
-const Error = styled.span`
-    font-weight: 600;
-    color: tomato;
-`;
+import { ErrorText, Form, Input, Switcher, Title, Wrapper } from "../styles/AuthStyles.tsx";
 
 type FormValues = {
     name: string;
@@ -58,9 +18,12 @@ function CreateAccount() {
         handleSubmit,
         formState: { errors, isSubmitting },
         setError,
+        clearErrors,
     } = useForm<FormValues>();
 
     const onSubmit = async (data: FormValues) => {
+        clearErrors();
+
         try {
             const credentials = await createUserWithEmailAndPassword(
                 auth,
@@ -86,24 +49,27 @@ function CreateAccount() {
                     type="text"
                     required
                 />
-                {errors.name && <Error>{errors.name.message}</Error>}
+                {errors.name && <ErrorText>{errors.name.message}</ErrorText>}
                 <Input
                     {...register("email", { required: "이메일을 입력해주세요." })}
                     placeholder="Email"
                     type="email"
                     required
                 />
-                {errors.email && <Error>{errors.email.message}</Error>}
+                {errors.email && <ErrorText>{errors.email.message}</ErrorText>}
                 <Input
                     {...register("password", { required: "비밀번호를 입력해주세요." })}
                     placeholder="Password"
                     type="password"
                     required
                 />
-                {errors.password && <Error>{errors.password.message}</Error>}
+                {errors.password && <ErrorText>{errors.password.message}</ErrorText>}
                 <Input type="submit" value={isSubmitting ? "Loading..." : "Create Account"} />
             </Form>
-            {errors.root && <Error>{errors.root.message}</Error>}
+            {errors.root && <ErrorText>{errors.root.message}</ErrorText>}
+            <Switcher>
+                Already have an account? <Link to="/login">Log in &rarr;</Link>
+            </Switcher>
         </Wrapper>
     );
 }
