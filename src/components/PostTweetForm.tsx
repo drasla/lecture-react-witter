@@ -1,5 +1,8 @@
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
+import { auth, db, storage } from "../firebase.ts";
+import { addDoc, collection, updateDoc } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 const Form = styled.form`
     display: flex;
@@ -68,7 +71,7 @@ const SubmitBtn = styled.input`
 
 type TweetFormValues = {
     tweet: string;
-    file: FileList;
+    file: FileList | null;
 };
 
 function PostTweetForm() {
@@ -76,6 +79,7 @@ function PostTweetForm() {
         register,
         handleSubmit,
         watch,
+        setValue,
         formState: { isSubmitting },
     } = useForm<TweetFormValues>();
 
@@ -83,17 +87,36 @@ function PostTweetForm() {
     const file = fileList && fileList.length === 1 ? fileList[0] : null;
 
     const onSubmit = async (data: TweetFormValues) => {
-        // tweet 내용
-        const tweet = data.tweet;
+        const user = auth.currentUser;
+        if (!user) return;
 
-        // 파일
-        const image = data.file?.[0] ?? null;
+        try {
+            const tweet = data.tweet;
+            const image = data.file?.[0] ?? null;
 
-        // 여기서 Firebase storage upload 또는 DB write 등 수행
-        console.log("Tweet:", tweet);
-        console.log("File:", image);
+            const doc = await addDoc(collection(db, "tweets"), {
+                tweet,
+                createdAt: Date.now(),
+                username: user.displayName || "Anonymous",
+                userId: user.uid,
+            });
 
-        await new Promise(r => setTimeout(r, 1000));
+            if (image) {
+                const locationRef = ref(
+                    storage,
+                    `tweets/${user.uid}-${user.displayName}/${doc.id}`,
+                );
+                const result = await uploadBytes(locationRef, image);
+                const url = await getDownloadURL(result.ref);
+                await updateDoc(doc, {
+                    photo: url,
+                });
+            }
+            setValue("tweet", "");
+            setValue("file", null);
+        } catch (e) {
+            console.log(e);
+        }
     };
 
     return (
@@ -102,6 +125,7 @@ function PostTweetForm() {
                 rows={5}
                 maxLength={180}
                 placeholder="What is happening?!"
+                required
                 {...register("tweet", { required: true })}
             />
             <AttachFileButton htmlFor="file">
